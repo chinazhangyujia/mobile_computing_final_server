@@ -10,6 +10,7 @@
     <div>
       <form>
         <p>status: <input type="text" id = "status"/> </p>
+        <p>missing_people_category: <input type = "text" id = "missing_people_category"/></p>
         <p>missing_people_id: <input type="text" id = "missing_people_id"/> </p>
         <p>user_id: <input type="text" id = "user_id"/>
           <input type = "button" id = "update_list_mqtt" value = "update_list_mqtt"/>
@@ -40,7 +41,8 @@
       var user_id = $("#user_id").val();
       var missing_people_id = $("#missing_people_id").val();
       var status = $("#status").val();
-      var message = user_id+","+missing_people_id+","+status;
+      var missing_people_category = $("#missing_people_category").val();
+      var message = user_id+","+missing_people_id+","+status+","+missing_people_category;
       client.publish('Gainesville', message);
     })
 
@@ -62,7 +64,10 @@
     })
 
     $("#synchronise").click(function(){
-      $.get('/synchronise', function(data){
+      var missing_people_category = $("#missing_people_category").val();
+      $.post('/synchronise', {
+        missing_people_category: missing_people_category
+      },function(data){
         var array = $.map(data, function(value, index) {
           return [value];
         });

@@ -12,12 +12,18 @@ var router = require('./router/index');
 var PORT = 8000;
 var Schema = mongoose.Schema;
 
-var UserDataSchema = new Schema({
+var children_schema = new Schema({
   user_id: String,
   missing_people_id: String
 });
 
-exports.UserData = UserData = mongoose.model('UserData', UserDataSchema);
+var patient_schema = new Schema({
+  user_id: String,
+  missing_people_id: String
+});
+
+exports.ChildrenData = ChildrenData = mongoose.model('ChildrenData', children_schema);
+exports.PatientData = PatientData = mongoose.model('PatientData', patient_schema);
 
 var server = app.listen(PORT, function(){
   console.log('listening ' + PORT);
@@ -42,14 +48,27 @@ client.on('connect', function(){
 
 client.on('message', function(topic, message){
   if (topic === 'Gainesville'){
-      console.log('hello');
       //var message_string = message.toString();
       console.log(message.toString());
       var temp = message.toString().split(",");
       var user_id = temp[0];
       var missing_people_id = temp[1];
       var status = temp[2];
+      var missing_people_category = temp[3];
+      var UserData;
       console.log(status);
+
+      switch (missing_people_category){
+        case "children":
+          UserData = ChildrenData;
+          break;
+        case "patient":
+          UserData = PatientData;
+          break;
+        default:
+          return;
+      }
+      
       if (status === 'create'){
         var newUser = {user_id: user_id, missing_people_id: missing_people_id};
         var newUserData = new UserData(newUser);
@@ -64,6 +83,9 @@ client.on('message', function(topic, message){
             console.log(missing_people_id + ' is deleted');
           }
         });
+      }
+      else{
+        console.log('this person does not exist');
       }
   }
 });
